@@ -11,11 +11,11 @@ use game::Game;
 use game::connection::Connection;
 
 pub enum Event {
-  Join(Connection),
+  Join(u32, Connection),
   Quit(u32),
-  StateOut(String),
   ChangePlayerName(u32, String),
   SendChatMessage(u32, String),
+  ReadyToPlay(u32)
 }
 
 #[tokio::main]
@@ -27,6 +27,8 @@ async fn main() {
   println!("Server listening on {}", addr);
 
   let (game_sender, game_receiver) = mpsc::unbounded_channel::<Event>();
+
+  // Spawn a new game
   tokio::spawn(run(game_receiver));
 
   let mut id = 1;
@@ -50,8 +52,8 @@ pub async fn run(mut game_receiver: UnboundedReceiver<Event>) {
 
   while let Some(event) = game_receiver.recv().await {
     match event {
-      Event::Join(conn) => {
-        match game_instance.add_player(conn){
+      Event::Join(id, conn) => {
+        match game_instance.add_player(id, conn){
           Ok(()) => {},
           Err(error) => { println!("Error: {}", error) }
         }
@@ -63,7 +65,9 @@ pub async fn run(mut game_receiver: UnboundedReceiver<Event>) {
         game_instance.send_message(id, message).await;
       }
       Event::Quit(_) => {}
-      Event::StateOut(_) => {}
+      Event::ReadyToPlay(_) => {
+        
+      }
     }   
   }
 }
@@ -71,8 +75,8 @@ pub async fn run(mut game_receiver: UnboundedReceiver<Event>) {
 async fn connect_player(id: u32, ws_stream: WebSocketStream<TcpStream>, unbounded_sender: UnboundedSender<Event>) {
   let (sender, mut receiver) = ws_stream.split();
   let mut step = 0;
-  let conn = Connection::new(id, sender);
-  match unbounded_sender.send(Event::Join(conn)) {
+  let conn = Connection::new(sender);
+  match unbounded_sender.send(Event::Join(id, conn)) {
     Ok(()) => {},
     Err(_) => {}
   }
@@ -138,4 +142,3 @@ async fn connect_player(id: u32, ws_stream: WebSocketStream<TcpStream>, unbounde
 //     }   
 //   }
 // }
-

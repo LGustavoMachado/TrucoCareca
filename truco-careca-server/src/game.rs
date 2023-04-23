@@ -1,22 +1,26 @@
 pub mod connection;
-
-use connection::Connection;
+pub mod player;
 use futures_util::SinkExt;
+use connection::Connection;
 use tokio_tungstenite::tungstenite::Message;
-
+use std::collections::HashMap;
+use player::Player;
 pub struct Game {
-    list_players: Vec<Connection>
+    list_players: HashMap<u32, (Connection, Player)>
 }
 
 impl Game {
 
     pub fn new() -> Self {
-        Self { list_players: vec![]  }
+        Self { list_players: HashMap::new() } // k = id, v = tuple => con + player
     }
 
-    pub fn add_player(&mut self, connection: Connection) -> Result<(), String> {
+    pub fn add_player(&mut self, id: u32, connection: Connection) -> Result<(), String> {
         if self.list_players.len() < 4 {
-            self.list_players.push(connection);
+            self.list_players.insert(
+                id,
+                (connection, Player::new("player".to_string(), false))
+            );
             println!("players: {}", self.list_players.len());
             Ok(())
         } else {
@@ -25,18 +29,22 @@ impl Game {
     }
 
     pub fn change_player_name(&mut self, id: u32, name: String) {
-        if let Some(player) = self.list_players.iter_mut().find(|p| p.id == id) {
+        if let Some((_, player)) = self.list_players.get_mut(&id) {
             player.name = name;
         }        
     }
 
-    pub async fn send_message(&mut self, id: u32, message: String) {
-        if let Some(player) = self.list_players.iter().find(|p| p.id == id) {
-            let name = player.name.clone();
-            for player in self.list_players.iter_mut().filter(|p| p.id != id) {
+    pub async fn send_message(&mut self, sender_id: u32, message: String) {
+        if let Some((_, sender_player)) = self.list_players.get(&sender_id) {
+            let name = sender_player.name.clone();
+            for (id, (conn, _)) in self.list_players.iter_mut() {
+                if *id == sender_id {
+                    continue;
+                }
+
                 let chat_message = String::from("") + &name + ": " + &message;
-                player.sender.send(Message::Text(chat_message)).await.expect("Error sending message");
+                conn.sender.send(Message::Text(chat_message)).await.expect("Error sending message");
             }  
-        }              
-    }
+        }           
+    }   
 }
