@@ -1,1 +1,1 @@
-/opt/dev/projects-pessoal/TrucoCareca/truco-careca-server/target/debug/truco-careca-server: /opt/dev/projects-pessoal/TrucoCareca/truco-careca-server/src/main.rs
+/opt/dev/projects-pessoal/TrucoCareca/truco-careca-server/target/debug/truco-careca-server: /opt/dev/projects-pessoal/TrucoCareca/truco-careca-server/src/game/connection.rs /opt/dev/projects-pessoal/TrucoCareca/truco-careca-server/src/game.rs /opt/dev/projects-pessoal/TrucoCareca/truco-careca-server/src/main.rs
