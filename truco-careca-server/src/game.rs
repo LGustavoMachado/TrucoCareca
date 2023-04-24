@@ -2,31 +2,30 @@
 // use tokio_tungstenite::tungstenite::Message;
 use std::collections::HashMap;
 
-pub mod player;
-pub mod state_machine;
 pub mod connection;
 pub mod game_event;
+pub mod player;
+pub mod state_machine;
 pub mod states;
 
-use player::Player;
 use connection::Connection;
+use player::Player;
 
 pub struct Game {
-    list_players: HashMap<u32, (Connection, Player)>
+    list_players: HashMap<u32, (Connection, Player)>,
 }
 
 impl Game {
-
     pub fn new() -> Self {
-        Self { list_players: HashMap::new() } // k = id, v = tuple => con + player
+        Self {
+            list_players: HashMap::new(),
+        } // k = id, v = tuple => con + player
     }
 
     pub fn add_player(&mut self, id: u32, connection: Connection) -> Result<(), String> {
         if self.list_players.len() < 4 {
-            self.list_players.insert(
-                id,
-                (connection, Player::new("player".to_string(), false))
-            );
+            self.list_players
+                .insert(id, (connection, Player::new("player".to_string(), false)));
             println!("players: {}", self.list_players.len());
             Ok(())
         } else {
@@ -38,19 +37,25 @@ impl Game {
         self.list_players.len() == 4
     }
 
-    pub fn get_players(&mut self) -> &HashMap<u32, (Connection, Player)> {
-        &self.list_players
+    pub fn get_player_mut(&mut self, id: u32) -> Option<&mut Player> {
+        if let Some((_, player)) = self.list_players.get_mut(&id) {
+            return Some(player);
+        }
+
+        None
     }
 
-    pub fn get_player_mut(&mut self, id: u32) -> &mut Player {
-        let (_, player) = self.list_players.get_mut(&id).unwrap();
-        player
+    pub fn are_players_ready(&self) -> bool {
+        return self
+            .list_players
+            .values()
+            .all(|(_, player)| player.is_ready());
     }
-    
+
     // pub fn change_player_name(&mut self, id: u32, name: String) {
     //     if let Some((_, player)) = self.list_players.get_mut(&id) {
     //         player.name = name;
-    //     }        
+    //     }
     // }
 
     // pub async fn send_message(&mut self, sender_id: u32, message: String) {
@@ -63,7 +68,7 @@ impl Game {
 
     //             let chat_message = String::from("") + &name + ": " + &message;
     //             conn.sender.send(Message::Text(chat_message)).await.expect("Error sending message");
-    //         }  
-    //     }           
-    // }   
+    //         }
+    //     }
+    // }
 }
