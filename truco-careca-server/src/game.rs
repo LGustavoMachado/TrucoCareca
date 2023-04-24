@@ -1,10 +1,16 @@
-pub mod connection;
-pub mod player;
 use futures_util::SinkExt;
-use connection::Connection;
 use tokio_tungstenite::tungstenite::Message;
 use std::collections::HashMap;
+
+pub mod player;
+pub mod state_machine;
+pub mod connection;
+pub mod game_event;
+pub mod states;
+
 use player::Player;
+use connection::Connection;
+
 pub struct Game {
     list_players: HashMap<u32, (Connection, Player)>
 }
@@ -15,14 +21,14 @@ impl Game {
         Self { list_players: HashMap::new() } // k = id, v = tuple => con + player
     }
 
-    pub fn add_player(&mut self, id: u32, connection: Connection) -> Result<(), String> {
+    pub fn add_player(&mut self, id: u32, connection: Connection) -> Result<bool, String> {
         if self.list_players.len() < 4 {
             self.list_players.insert(
                 id,
                 (connection, Player::new("player".to_string(), false))
             );
             println!("players: {}", self.list_players.len());
-            Ok(())
+            Ok(self.list_players.len() == 4)
         } else {
             Err(String::from("Atingiu o limite de jogadores"))
         }

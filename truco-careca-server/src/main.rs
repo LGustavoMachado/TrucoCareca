@@ -8,7 +8,11 @@ use futures_util::StreamExt;
 mod game;
 
 use game::Game;
+use game::game_event::GameEvent;
 use game::connection::Connection;
+use game::state_machine::StateMachine;
+use game::states::waiting_for_player_state::WaitingForPlayersState;
+
 
 pub enum Event {
   Join(u32, Connection),
@@ -49,14 +53,13 @@ async fn main() {
 
 pub async fn run(mut game_receiver: UnboundedReceiver<Event>) {
   let mut game_instance = Game::new();
+  let mut state_machine = StateMachine::new(Box::new(WaitingForPlayersState::new()));
 
   while let Some(event) = game_receiver.recv().await {
+    
     match event {
       Event::Join(id, conn) => {
-        match game_instance.add_player(id, conn){
-          Ok(()) => {},
-          Err(error) => { println!("Error: {}", error) }
-        }
+        state_machine.update(&mut game_instance, GameEvent::PlayerJoined(id, conn));
       }
       Event::ChangePlayerName(id, name) => {
         game_instance.change_player_name(id, name);
