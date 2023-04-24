@@ -8,24 +8,27 @@ pub struct WaitingForPlayersState {
 
 impl WaitingForPlayersState {
   pub fn new() -> Self {
+    println!("WAITING FOR PLAYERS STATE");
     Self {}
   }
 }
 
 impl GameState for WaitingForPlayersState {
-  fn update(&self, game: &mut Game, event: GameEvent) -> Box<dyn GameState> {
-    println!("WAITING FOR PLAYERS STATE");
-    if let GameEvent::PlayerJoined(id, conn) = event {
-      match game.add_player(id, conn){
-        Ok(is_game_full) => {
-          if is_game_full {
-            return Box::new(WaitingForReadyState::new());
-          }
-        },
-        Err(error) => { println!("Error: {}", error) }
+  fn update(&self, game: &mut Game, event: GameEvent) -> Option<Box<dyn GameState>> {
+    match event {
+      GameEvent::PlayerJoined(id, conn) => {
+        let res = game.add_player(id, conn);
+        match res {
+          Result::Ok(()) => {
+            if game.is_full() { 
+              return Some(Box::new(WaitingForReadyState::new())); 
+            }
+          },
+          Result::Err(_) => { }
+        }
       }
+      _ => { }
     }
-
-    Box::new(WaitingForPlayersState::new())   
+    None
   }
 }

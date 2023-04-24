@@ -3,6 +3,7 @@ use tokio::net::{TcpStream};
 use tokio_tungstenite::{WebSocketStream};
 use tokio_tungstenite::tungstenite::Message;
 
+#[derive(Debug)]
 pub struct Connection {
   pub sender: SplitSink<WebSocketStream<TcpStream>, Message>
 }

@@ -1,5 +1,5 @@
-use futures_util::SinkExt;
-use tokio_tungstenite::tungstenite::Message;
+// use futures_util::SinkExt;
+// use tokio_tungstenite::tungstenite::Message;
 use std::collections::HashMap;
 
 pub mod player;
@@ -21,36 +21,49 @@ impl Game {
         Self { list_players: HashMap::new() } // k = id, v = tuple => con + player
     }
 
-    pub fn add_player(&mut self, id: u32, connection: Connection) -> Result<bool, String> {
+    pub fn add_player(&mut self, id: u32, connection: Connection) -> Result<(), String> {
         if self.list_players.len() < 4 {
             self.list_players.insert(
                 id,
                 (connection, Player::new("player".to_string(), false))
             );
             println!("players: {}", self.list_players.len());
-            Ok(self.list_players.len() == 4)
+            Ok(())
         } else {
             Err(String::from("Atingiu o limite de jogadores"))
         }
     }
 
-    pub fn change_player_name(&mut self, id: u32, name: String) {
-        if let Some((_, player)) = self.list_players.get_mut(&id) {
-            player.name = name;
-        }        
+    pub fn is_full(&self) -> bool {
+        self.list_players.len() == 4
     }
 
-    pub async fn send_message(&mut self, sender_id: u32, message: String) {
-        if let Some((_, sender_player)) = self.list_players.get(&sender_id) {
-            let name = sender_player.name.clone();
-            for (id, (conn, _)) in self.list_players.iter_mut() {
-                if *id == sender_id {
-                    continue;
-                }
+    pub fn get_players(&mut self) -> &HashMap<u32, (Connection, Player)> {
+        &self.list_players
+    }
 
-                let chat_message = String::from("") + &name + ": " + &message;
-                conn.sender.send(Message::Text(chat_message)).await.expect("Error sending message");
-            }  
-        }           
-    }   
+    pub fn get_player_mut(&mut self, id: u32) -> &mut Player {
+        let (_, player) = self.list_players.get_mut(&id).unwrap();
+        player
+    }
+    
+    // pub fn change_player_name(&mut self, id: u32, name: String) {
+    //     if let Some((_, player)) = self.list_players.get_mut(&id) {
+    //         player.name = name;
+    //     }        
+    // }
+
+    // pub async fn send_message(&mut self, sender_id: u32, message: String) {
+    //     if let Some((_, sender_player)) = self.list_players.get(&sender_id) {
+    //         let name = sender_player.name.clone();
+    //         for (id, (conn, _)) in self.list_players.iter_mut() {
+    //             if *id == sender_id {
+    //                 continue;
+    //             }
+
+    //             let chat_message = String::from("") + &name + ": " + &message;
+    //             conn.sender.send(Message::Text(chat_message)).await.expect("Error sending message");
+    //         }  
+    //     }           
+    // }   
 }

@@ -13,13 +13,14 @@ use game::connection::Connection;
 use game::state_machine::StateMachine;
 use game::states::waiting_for_player_state::WaitingForPlayersState;
 
-
+#[derive(Debug)]
 pub enum Event {
   Join(u32, Connection),
   Quit(u32),
   ChangePlayerName(u32, String),
   SendChatMessage(u32, String),
-  ReadyToPlay(u32)
+  ReadyToPlay(u32),
+  PlayerCommand(u32, TrucoCommand),
 }
 
 #[tokio::main]
@@ -61,24 +62,36 @@ pub async fn run(mut game_receiver: UnboundedReceiver<Event>) {
       Event::Join(id, conn) => {
         state_machine.update(&mut game_instance, GameEvent::PlayerJoined(id, conn));
       }
-      Event::ChangePlayerName(id, name) => {
-        game_instance.change_player_name(id, name);
-      }
-      Event::SendChatMessage(id, message) => {
-        game_instance.send_message(id, message).await;
+      Event::PlayerCommand(id, command) => {
+        let game_event = get_event_from_command(id, command).unwrap();
+        state_machine.update(&mut game_instance, game_event); 
       }
       Event::Quit(_) => {}
-      Event::ReadyToPlay(_) => {
-        
-      }
-    }   
+      _ => {}
+    }
   }
+}
+
+pub fn get_event_from_command(id: u32, command: TrucoCommand) -> Option<GameEvent> {
+  match command.name.as_str() {
+    "player-ready" => { 
+      let name = command.body.get("name").unwrap();
+      return Some(GameEvent::PlayerReady(id, name.to_string()));
+    },
+    _ => { None }
+  }
+}
+
+#[derive(serde::Deserialize, Debug)]
+pub struct TrucoCommand {
+  name: String,
+  body: serde_json::Value,
 }
 
 async fn connect_player(id: u32, ws_stream: WebSocketStream<TcpStream>, unbounded_sender: UnboundedSender<Event>) {
   let (sender, mut receiver) = ws_stream.split();
-  let mut step = 0;
   let conn = Connection::new(sender);
+
   match unbounded_sender.send(Event::Join(id, conn)) {
     Ok(()) => {},
     Err(_) => {}
@@ -86,62 +99,10 @@ async fn connect_player(id: u32, ws_stream: WebSocketStream<TcpStream>, unbounde
 
   while let Some(Ok(message)) = receiver.next().await {
     if message.is_text() {
-    let message_str = message.to_text().unwrap();
-
-      if step == 0 {
-        let name = String::from(message_str);
-        match unbounded_sender.send(Event::ChangePlayerName(id, name)) {
-          Ok(()) => {},
-          Err(_) => {}
-        }
-      } else {
-        match unbounded_sender.send(Event::SendChatMessage(id, String::from(message_str))) {
-          Ok(()) => {},
-          Err(_) => {}
-        }
+      let message_str = message.to_text().unwrap();
+      if let Ok(command) = serde_json::from_str::<TrucoCommand>(message_str) {
+        unbounded_sender.send(Event::PlayerCommand(id, command)).ok(); 
       }
-      
-      step += 1;
     }
   }
 }
-
-// async fn listen(ws_stream: WebSocketStream<TcpStream>, unbounded_sender: UnboundedSender<Event>, id: u32) {
-//   println!("WebSocket connection established");
-
-//   let (sender, mut receiver) = ws_stream.split();
-//   let conn = Connection::new(id, sender);
-//   unbounded_sender.send(Event::Join(conn));
-//   while let Some(Ok(msg)) = receiver.next().await {
-
-//     if msg.is_text() {
-//       println!("Received message: {}", msg.to_text().unwrap());
-
-//       let message = String::from(msg.to_text().unwrap());
-//       unbounded_sender.send(Event::StateOut(message));
-//     }
-//   }
-// }
-
-// async fn broadcast(mut rx: UnboundedReceiver<Event>) {
-
-//   let mut connections: HashMap<u32, Connection> = HashMap::new();
-
-//   while let Some(event) = rx.recv().await {
-//     match event {
-//       Event::Join(conn) => {
-//         connections.insert(conn.id, conn);
-//       }
-//       Event::Quit(id) => {
-//         connections.remove(&id);
-//       }
-//       Event::StateOut(message) => {
-//         for(id, conn) in connections.iter_mut() {
-//           println!("{}", id);
-//           let _ = conn.sender.send(Message::Text(message.clone())).await.expect("Error sending message");
-//           println!("Mensagem enviada");
-//         }
-//       }
-//     }   
-//   }
-// }

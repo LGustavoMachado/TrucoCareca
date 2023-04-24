@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct Player {
   pub name: String,
   pub is_ready: bool
