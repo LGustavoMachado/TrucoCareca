@@ -3,7 +3,9 @@
 use std::collections::HashMap;
 
 pub mod connection;
+pub mod factories;
 pub mod game_event;
+pub mod models;
 pub mod player;
 pub mod state_machine;
 pub mod states;
