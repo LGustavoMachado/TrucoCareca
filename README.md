@@ -6,13 +6,35 @@ TrucoCareca is a truco game made from 3 bald guys that wanted to learn Rust prog
 
 As a prerequisite to build and run this project you will need to install some components. Above we have the recomended ones but feel free to choose any other IDE that meets the requirements to work with a Rust project.
 
+## Rust
+
+### Installing with rustup
+
+This project is being build using Rust lang so you will need to install rustc bin. 
+
+To do it you can follow this [instructions](https://rustup.rs/).
+
+### Installing with asdf (version manager)
+
+Download asdf
+```bash
+cd ~/
+git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.1`
+```
+
+Set up the rust plugin for asdf
+```bash
+asdf plugin-add rust https://github.com/asdf-community/asdf-rust.git
+asdf install rust <version>
+asdf global rust <version>
+```
+
+
+# Optional steps
+
 ## VSCode
 
 VSCode is a editor that allow us to install pretty nice extensions to boost our coding. You can install VSCode downloading it [here](https://code.visualstudio.com/)
-
-## Rust
-
-This project is being build using Rust lang so you will need to install rustc bin. To do it you can follow this [instructions](https://rustup.rs/).
 
 ## VSCode extensions
 
@@ -24,7 +46,8 @@ This extension provides support for the Rust programming language in vscode and 
 
 This extension provides a TextMate grammar for Rust and is pretty nice to keep the project well frmatted. It can be found and install directly from vscode extensions.
 
-## Websocket
+
+# Websocket
 
 To connect to the project and test it without a frontend you can use postman websockets (beta). You can found postman to install [here](https://www.postman.com/downloads/).
 
