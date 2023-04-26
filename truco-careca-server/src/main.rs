@@ -4,9 +4,12 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tokio_tungstenite::{accept_async, WebSocketStream};
+use futures_util::SinkExt;
+use tokio_tungstenite::tungstenite::Message;
 
 mod game;
 
+use game::game_event::get_event_from_command;
 use game::connection::Connection;
 use game::game_event::GameEvent;
 use game::state_machine::StateMachine;
@@ -16,11 +19,11 @@ use game::Game;
 #[derive(Debug)]
 pub enum Event {
     Join(u32, Connection),
+    Input(u32, TrucoCommand),
     Quit(u32),
     ChangePlayerName(u32, String),
     SendChatMessage(u32, String),
     ReadyToPlay(u32),
-    PlayerCommand(u32, TrucoCommand),
 }
 
 #[tokio::main]
@@ -60,23 +63,23 @@ pub async fn run(mut game_receiver: UnboundedReceiver<Event>) {
             Event::Join(id, conn) => {
                 state_machine.update(&mut game_instance, GameEvent::PlayerJoined(id, conn));
             }
-            Event::PlayerCommand(id, command) => {
+            Event::Input(id, command) => {
                 let game_event = get_event_from_command(id, command).unwrap();
                 state_machine.update(&mut game_instance, game_event);
             }
             Event::Quit(_) => {}
             _ => {}
         }
-    }
-}
 
-pub fn get_event_from_command(id: u32, command: TrucoCommand) -> Option<GameEvent> {
-    match command.name.as_str() {
-        "player-ready" => {
-            let name = command.body.get("name").unwrap();
-            return Some(GameEvent::PlayerReady(id, name.to_string()));
+        game_instance.output_mut().reverse();
+
+        while let Some((id, message)) = game_instance.output_mut().pop() {
+            let (connection, _) = game_instance.get_player_mut(id).unwrap();
+            match connection.sender.send(Message::Text(message.clone())).await {
+                Ok(_) => { println!("Message sent successfully {}", message) }
+                Err(_) => {}
+            }
         }
-        _ => None,
     }
 }
 
@@ -104,7 +107,7 @@ async fn connect_player(
             let message_str = message.to_text().unwrap();
             if let Ok(command) = serde_json::from_str::<TrucoCommand>(message_str) {
                 unbounded_sender
-                    .send(Event::PlayerCommand(id, command))
+                    .send(Event::Input(id, command))
                     .ok();
             }
         }
