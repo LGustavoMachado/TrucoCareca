@@ -49,6 +49,18 @@ impl Game {
         None
     }
 
+    pub fn get_player_seat_index(&self, id: u32) -> Option<usize> {
+        for (index, player_id) in self.seats.clone().iter().enumerate() {
+            if player_id.is_none() {
+                continue;
+            }
+            if player_id.unwrap() == id {
+                return Some(index);
+            }
+        }
+        None
+    }
+
     pub fn are_players_ready(&self) -> bool {
         return self
             .list_players
@@ -64,24 +76,5 @@ impl Game {
         self.output.push((id, message));
     }
 
-    // pub fn change_player_name(&mut self, id: u32, name: String) {
-    //     if let Some((_, player)) = self.list_players.get_mut(&id) {
-    //         player.name = name;
-    //     }
-    // }
-
-    // pub async fn send_message(&mut self, sender_id: u32, message: String) {
-    //     if let Some((_, sender_player)) = self.list_players.get(&sender_id) {
-    //         let name = sender_player.name.clone();
-    //         for (id, (conn, _)) in self.list_players.iter_mut() {
-    //             if *id == sender_id {
-    //                 continue;
-    //             }
-
-    //             let chat_message = String::from("") + &name + ": " + &message;
-    //             conn.sender.send(Message::Text(chat_message)).await.expect("Error sending message");
-    //         }
-    //     }
-    // }
 }
 

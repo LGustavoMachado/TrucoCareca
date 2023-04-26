@@ -6,7 +6,7 @@ pub enum GameEvent {
   PlayerReady(u32, String),
   PickUpSeatEvent(u32, u32),
   LeaveSeatEvent(u32),
-  StartTheGameEvent()
+  StartTheGameEvent
 }
 
 pub fn get_event_from_command(id: u32, command: TrucoCommand) -> Option<GameEvent> {
@@ -24,7 +24,7 @@ pub fn get_event_from_command(id: u32, command: TrucoCommand) -> Option<GameEven
             return Some(GameEvent::LeaveSeatEvent(id));
         }
         "start-the-game" => {
-            return Some(GameEvent::StartTheGameEvent());
+            return Some(GameEvent::StartTheGameEvent);
         }
         _ => None,
     }

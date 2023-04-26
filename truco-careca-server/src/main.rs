@@ -70,9 +70,11 @@ pub async fn run(mut game_receiver: UnboundedReceiver<Event>) {
             Event::Quit(_) => {}
             _ => {}
         }
-        
+
+        game_instance.output_mut().reverse();
+
         while let Some((id, message)) = game_instance.output_mut().pop() {
-            let (connection, _) =  game_instance.get_player_mut(id).unwrap();
+            let (connection, _) = game_instance.get_player_mut(id).unwrap();
             match connection.sender.send(Message::Text(message.clone())).await {
                 Ok(_) => { println!("Message sent successfully {}", message) }
                 Err(_) => {}

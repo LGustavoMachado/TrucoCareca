@@ -17,36 +17,38 @@ impl GameState for PickUpSeatsState {
     fn update(&self, game: &mut Game, event: GameEvent) -> Option<Box<dyn GameState>> {
         match event {
             GameEvent::PickUpSeatEvent(id, seat) => {
+                if seat > 3 { return None; }
+
                 let seat = seat as usize;
-                // Validate if the seat is empty
                 let seat_free = game.seats[seat].is_none();
 
                 if seat_free {
-                    // Remove player from the seat if he has a seat already
-                    for (index, player_id) in game.seats.clone().iter().enumerate() {
-                        if player_id.is_none() {
-                            continue;
-                        }
-                        if player_id.unwrap() == id {
-                            game.seats[index] = None;
-                        }
+                    if let Some(index) = game.get_player_seat_index(id) {
+                        game.seats[index] = None;
                     }
-                    // add to seat
-                    game.seats[seat] = Some(id);
-                    println!("Player {} seated pos: {}", id, seat);
+                    game.seats[seat] = Some(id); // add to seat
+                    game.player_output(id, format!("Player {} in seat {}", id, seat));
                 } else {
-                    // If not empty send an error message to player
                     game.player_output(id, String::from("SEAT IS OCCUPIED"));
                 }
             }
-            GameEvent::LeaveSeatEvent(_id) => {
-                // Find the player seat
-                // Remove from the seat
+            GameEvent::LeaveSeatEvent(id) => {
+                // Find the player seat and remove it
+                if let Some(index) = game.get_player_seat_index(id) {
+                    game.seats[index] = None;
+                    game.player_output(id, format!("Player left seat {}", index));
+                }
             }
-            GameEvent::StartTheGameEvent() => {
-                return Some(Box::new(GameStartedState::new()));
+            GameEvent::StartTheGameEvent => {
+                if game.seats.iter().all(Option::is_some) {
+                    return Some(Box::new(GameStartedState::new()));
+                }
             }
             _ => {}
+        }
+
+        if game.seats.iter().all(Option::is_some) {
+            println!("Seats are all occupied")
         }
 
         None
