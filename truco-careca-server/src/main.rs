@@ -7,6 +7,7 @@ use tokio_tungstenite::{accept_async, WebSocketStream};
 
 mod game;
 
+use game::game_event::get_event_from_command;
 use game::connection::Connection;
 use game::game_event::GameEvent;
 use game::state_machine::StateMachine;
@@ -67,16 +68,6 @@ pub async fn run(mut game_receiver: UnboundedReceiver<Event>) {
             Event::Quit(_) => {}
             _ => {}
         }
-    }
-}
-
-pub fn get_event_from_command(id: u32, command: TrucoCommand) -> Option<GameEvent> {
-    match command.name.as_str() {
-        "player-ready" => {
-            let name = command.body.get("name").unwrap();
-            return Some(GameEvent::PlayerReady(id, name.to_string()));
-        }
-        _ => None,
     }
 }
 
