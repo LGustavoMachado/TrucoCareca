@@ -1,9 +1,8 @@
 use crate::game::game_event::GameEvent;
 use crate::game::state_machine::GameState;
-// use futures_util::SinkExt;
-// use tokio_tungstenite::tungstenite::Message;
-// use crate::game::states::game_started_state::GameStartedState;
 use crate::game::Game;
+
+use super::game_started_state::GameStartedState;
 
 pub struct PickUpSeatsState {}
 
@@ -21,7 +20,7 @@ impl GameState for PickUpSeatsState {
                 let seat = seat as usize;
                 // Validate if the seat is empty
                 let seat_free = game.seats[seat].is_none();
-                
+
                 if seat_free {
                     // Remove player from the seat if he has a seat already
                     for (index, player_id) in game.seats.clone().iter().enumerate() {
@@ -36,21 +35,16 @@ impl GameState for PickUpSeatsState {
                     game.seats[seat] = Some(id);
                     println!("Player {} seated pos: {}", id, seat);
                 } else {
-                    // If not empty send an error message
-                    // let (connection, _) =  self.get_player_mut(id).unwrap();
-                    // connection.sender.send(Message::Text(message)).await;
-                    // We cannot send messages from here because we cannot make this method async, 
-                    // we need to figure out a solution for this issue, otherwise the user wont 
-                    // receive an error message
-                    println!("ERROR SEAT IS OCCUPIED");
+                    // If not empty send an error message to player
+                    game.player_output(id, String::from("SEAT IS OCCUPIED"));
                 }
             }
-            GameEvent::LeaveSeatEvent(id) => {
+            GameEvent::LeaveSeatEvent(_id) => {
                 // Find the player seat
                 // Remove from the seat
             }
             GameEvent::StartTheGameEvent() => {
-                
+                return Some(Box::new(GameStartedState::new()));
             }
             _ => {}
         }

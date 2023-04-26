@@ -1,6 +1,5 @@
-// use futures_util::SinkExt;
-// use tokio_tungstenite::tungstenite::Message;
 use std::collections::HashMap;
+use std::vec::Vec;
 
 pub mod connection;
 pub mod factories;
@@ -14,6 +13,7 @@ use connection::Connection;
 use player::Player;
 
 pub struct Game {
+    output: Vec<(u32, String)>,
     list_players: HashMap<u32, (Connection, Player)>,
     seats: [Option<u32>; 4]
 }
@@ -21,9 +21,10 @@ pub struct Game {
 impl Game {
     pub fn new() -> Self {
         Self {
-            seats: [None; 4], 
+            output: vec![],
+            seats: [None; 4],
             list_players: HashMap::new(),
-        } // k = id, v = tuple => con + player
+        }
     }
 
     pub fn add_player(&mut self, id: u32, connection: Connection) -> Result<(), String> {
@@ -53,6 +54,14 @@ impl Game {
             .list_players
             .values()
             .all(|(_, player)| player.is_ready());
+    }
+
+    pub fn output_mut(&mut self) -> &mut Vec<(u32, String)> {
+        &mut self.output
+    }
+
+    pub fn player_output(&mut self, id: u32, message: String) {
+        self.output.push((id, message));
     }
 
     // pub fn change_player_name(&mut self, id: u32, name: String) {
