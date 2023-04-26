@@ -22,6 +22,17 @@ cd ~/
 git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.8.1`
 ```
 
+Add the following to ~/.bashrc:
+```bash
+. "$HOME/.asdf/asdf.sh"
+```
+
+Completions must be configured by adding the following to your .bashrc:
+```
+. "$HOME/.asdf/completions/asdf.bash"
+```
+
+
 Set up the rust plugin for asdf
 ```bash
 asdf plugin-add rust https://github.com/asdf-community/asdf-rust.git
