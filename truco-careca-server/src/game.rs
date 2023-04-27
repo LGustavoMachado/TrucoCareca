@@ -28,7 +28,7 @@ pub struct Game {
     list_players: HashMap<u32, (Connection, Player)>,
     seats: [Option<u32>; 4],
     deck: DeckOfCards,
-    pub head: usize, 
+    pub head: usize,
     pub turn: usize,
     pub score: (u8, u8),
     pub dealer: usize,
@@ -41,23 +41,25 @@ pub struct Game {
     pub mode: GameMode,
 }
 
+pub const NEW_HAND: Vec<Card> = Vec::new();
+
 impl Game {
 
     pub fn new() -> Self {
-        let hand: Vec<Card> = Vec::new();
+
         Self {
-            output: vec![],
-            seats: [None; 4],
-            list_players: HashMap::new(),
-            deck: DeckOfCards::new(Vec::new()),
             head: 0,
             turn: 0,
             score: (0, 0),
             dealer: 0,
+            round_value: 1,
+            output: vec![],
+            seats: [None; 4],
+            list_players: HashMap::new(),
+            deck: DeckOfCards::new(Vec::new()),
             turn_results: Vec::new(),
             table_cards: Vec::new(),
-            hands: [hand.clone(), hand.clone(), hand.clone(), hand.clone()],
-            round_value: 1,
+            hands: [NEW_HAND; 4],
             gave_up_players: Vec::new(),
             manilha: Card::new(Rank::Ace, Suit::Spades),
             mode: GameMode::Normal,

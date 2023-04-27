@@ -14,6 +14,6 @@ impl PlayerTurnState {
 
 impl GameState for PlayerTurnState {
   fn update(&self, game: &mut Game, _event: GameEvent) -> Option<Box<dyn GameState>> {
-    None 
+    None
   }
 }
