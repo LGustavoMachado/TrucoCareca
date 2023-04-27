@@ -12,18 +12,55 @@ pub mod states;
 use connection::Connection;
 use player::Player;
 
+pub enum TurnResult {
+    Winner(usize),
+    Draw
+}
+
+use self::models::types::Card;
+use self::models::types::Rank;
+use self::models::types::Suit;
+use self::models::deck_of_cards::DeckOfCards;
+use self::models::types::GameMode;
+
 pub struct Game {
     output: Vec<(u32, String)>,
     list_players: HashMap<u32, (Connection, Player)>,
-    seats: [Option<u32>; 4]
+    seats: [Option<u32>; 4],
+    deck: DeckOfCards,
+    pub head: usize, 
+    pub turn: usize,
+    pub score: (u8, u8),
+    pub dealer: usize,
+    pub turn_results: Vec<TurnResult>,
+    pub table_cards: Vec<Card>,
+    pub hands: [Vec<Card>; 4],
+    pub round_value: u8,
+    pub gave_up_players: Vec<usize>,
+    pub manilha: Card,
+    pub mode: GameMode,
 }
 
 impl Game {
+
     pub fn new() -> Self {
+        let hand: Vec<Card> = Vec::new();
         Self {
             output: vec![],
             seats: [None; 4],
             list_players: HashMap::new(),
+            deck: DeckOfCards::new(Vec::new()),
+            head: 0,
+            turn: 0,
+            score: (0, 0),
+            dealer: 0,
+            turn_results: Vec::new(),
+            table_cards: Vec::new(),
+            hands: [hand.clone(), hand.clone(), hand.clone(), hand.clone()],
+            round_value: 1,
+            gave_up_players: Vec::new(),
+            manilha: Card::new(Rank::Ace, Suit::Spades),
+            mode: GameMode::Normal,
         }
     }
 
@@ -75,6 +112,7 @@ impl Game {
     pub fn player_output(&mut self, id: u32, message: String) {
         self.output.push((id, message));
     }
+
 
 }
 

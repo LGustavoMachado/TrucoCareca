@@ -12,13 +12,13 @@ impl DeckOfCards {
         Self { cards }
     }
 
-    fn shuffle(mut self) -> Self {
+    pub fn shuffle(mut self) -> Self {
         let mut rng = rand::thread_rng();
         self.cards.shuffle(&mut rng);
         self
     }
 
-    fn cut(mut self, n_cards: u8) -> Self {
+    pub fn cut(mut self, n_cards: u8) -> Self {
         let len = self.cards.len() as u8;
         let cut_position = (n_cards % len) as usize;
         let (left_half, right_half) = self.cards.split_at(cut_position);
@@ -27,7 +27,7 @@ impl DeckOfCards {
         self
     }
 
-    fn deal(&mut self) -> Option<Card> {
+    pub fn deal(&mut self) -> Option<Card> {
         self.cards.pop()
     }
 }

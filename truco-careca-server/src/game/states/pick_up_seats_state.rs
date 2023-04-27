@@ -2,7 +2,7 @@ use crate::game::game_event::GameEvent;
 use crate::game::state_machine::GameState;
 use crate::game::Game;
 
-use super::game_started_state::GameStartedState;
+use super::start_game_state::StartGameState;
 
 pub struct PickUpSeatsState {}
 
@@ -41,7 +41,7 @@ impl GameState for PickUpSeatsState {
             }
             GameEvent::StartTheGameEvent => {
                 if game.seats.iter().all(Option::is_some) {
-                    return Some(Box::new(GameStartedState::new()));
+                    return Some(Box::new(StartGameState::new()));
                 }
             }
             _ => {}
