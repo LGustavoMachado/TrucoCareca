@@ -20,7 +20,7 @@ impl GameState for StartRoundState {
   fn update(&self, game: &mut Game, _event: GameEvent) -> Option<Box<dyn GameState>> {
     game.turn = 0;
     game.table_cards = Vec::new();
-    game.hands = [NEW_HAND; 4];
+    game.hands = [[None; 3]; 4];
     game.round_value = 1;
     game.gave_up_players = Vec::new();
     game.deck = create_deck(DeckType::Dirty);
@@ -31,10 +31,10 @@ impl GameState for StartRoundState {
       game.mode = GameMode::IronHands;
     }
 
-    for _ in 0..2 {
+    for j in 0..2 {
       for i in 0..3 {
         let card = game.deck.deal().unwrap();
-        game.hands[i].push(card);
+        game.hands[i][j] = Some(card);
       };
     }
 

@@ -34,7 +34,7 @@ pub struct Game {
     pub dealer: usize,
     pub turn_results: Vec<TurnResult>,
     pub table_cards: Vec<Card>,
-    pub hands: [Vec<Card>; 4],
+    pub hands: [[Option<Card>; 3]; 4],
     pub round_value: u8,
     pub gave_up_players: Vec<usize>,
     pub manilha: Card,
@@ -59,7 +59,7 @@ impl Game {
             deck: DeckOfCards::new(Vec::new()),
             turn_results: Vec::new(),
             table_cards: Vec::new(),
-            hands: [NEW_HAND; 4],
+            hands: [[None; 3]; 4],
             gave_up_players: Vec::new(),
             manilha: Card::new(Rank::Ace, Suit::Spades),
             mode: GameMode::Normal,
@@ -114,7 +114,4 @@ impl Game {
     pub fn player_output(&mut self, id: u32, message: String) {
         self.output.push((id, message));
     }
-
-
 }
-
