@@ -1,6 +1,5 @@
-use crate::game::{Game, NEW_HAND};
+use crate::game::{Game};
 use crate::game::models::types::GameMode;
-use crate::game::game_event::GameEvent;
 use crate::game::state_machine::GameState;
 use crate::game::factories::deck_factory::{create_deck, DeckType};
 use crate::game::states::player_turn_state::PlayerTurnState;
@@ -17,7 +16,7 @@ impl StartRoundState {
 }
 
 impl GameState for StartRoundState {
-  fn update(&self, game: &mut Game, _event: GameEvent) -> Option<Box<dyn GameState>> {
+  fn update(&self, game: &mut Game, _time: f32) -> Option<Box<dyn GameState>> {
     game.turn = 0;
     game.table_cards = Vec::new();
     game.hands = [[None; 3]; 4];

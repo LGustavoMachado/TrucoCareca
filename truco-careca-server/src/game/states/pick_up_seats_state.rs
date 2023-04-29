@@ -14,7 +14,8 @@ impl PickUpSeatsState {
 }
 
 impl GameState for PickUpSeatsState {
-    fn update(&self, game: &mut Game, event: GameEvent) -> Option<Box<dyn GameState>> {
+    fn update(&self, game: &mut Game, _time: f32) -> Option<Box<dyn GameState>> {
+        let event = GameEvent::None;
         match event {
             GameEvent::PickUpSeatEvent(id, seat) => {
                 if seat > 3 { return None; }

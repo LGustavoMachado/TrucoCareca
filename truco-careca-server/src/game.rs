@@ -11,6 +11,7 @@ pub mod states;
 
 use connection::Connection;
 use player::Player;
+use game_event::GameEvent;
 
 pub enum TurnResult {
     Winner(usize),
@@ -41,8 +42,6 @@ pub struct Game {
     pub mode: GameMode,
 }
 
-pub const NEW_HAND: Vec<Card> = Vec::new();
-
 impl Game {
 
     pub fn new() -> Self {
@@ -64,6 +63,9 @@ impl Game {
             manilha: Card::new(Rank::Ace, Suit::Spades),
             mode: GameMode::Normal,
         }
+    }
+
+    pub fn input(&mut self, _event: GameEvent) {
     }
 
     pub fn add_player(&mut self, id: u32, connection: Connection) -> Result<(), String> {

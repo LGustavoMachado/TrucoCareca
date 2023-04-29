@@ -1,5 +1,4 @@
 use crate::game::Game;
-use crate::game::game_event::GameEvent;
 use crate::game::state_machine::GameState;
 
 pub struct PlayerTurnState {
@@ -13,7 +12,7 @@ impl PlayerTurnState {
 }
 
 impl GameState for PlayerTurnState {
-  fn update(&self, game: &mut Game, _event: GameEvent) -> Option<Box<dyn GameState>> {
+  fn update(&self, _game: &mut Game, _time: f32) -> Option<Box<dyn GameState>> {
     None
   }
 }

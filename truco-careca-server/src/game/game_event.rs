@@ -7,6 +7,7 @@ pub enum GameEvent {
   PickUpSeatEvent(u32, u32),
   LeaveSeatEvent(u32),
   StartTheGameEvent,
+  None,
 }
 
 pub fn get_event_from_command(id: u32, command: TrucoCommand) -> Option<GameEvent> {
