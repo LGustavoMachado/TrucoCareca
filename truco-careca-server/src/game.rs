@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::vec::Vec;
+use queues::*;
 
 pub mod connection;
 pub mod factories;
@@ -25,7 +26,8 @@ use self::models::deck_of_cards::DeckOfCards;
 use self::models::types::GameMode;
 
 pub struct Game {
-    output: Vec<(u32, String)>,
+    inputs: Queue<GameEvent>,
+    output: Queue<(u32, String)>,
     list_players: HashMap<u32, (Connection, Player)>,
     seats: [Option<u32>; 4],
     deck: DeckOfCards,
@@ -52,7 +54,8 @@ impl Game {
             score: (0, 0),
             dealer: 0,
             round_value: 1,
-            output: vec![],
+            inputs: queue![],
+            output: queue![],
             seats: [None; 4],
             list_players: HashMap::new(),
             deck: DeckOfCards::new(Vec::new()),
@@ -65,7 +68,12 @@ impl Game {
         }
     }
 
-    pub fn input(&mut self, _event: GameEvent) {
+    pub fn input(&mut self, event: GameEvent) {
+        self.inputs.add(event);
+    }
+
+    pub fn output(&mut self, id: u32, message: String) {
+        self.output.add((id, message));
     }
 
     pub fn add_player(&mut self, id: u32, connection: Connection) -> Result<(), String> {
@@ -109,11 +117,8 @@ impl Game {
             .all(|(_, player)| player.is_ready());
     }
 
-    pub fn output_mut(&mut self) -> &mut Vec<(u32, String)> {
+    pub fn output_mut(&mut self) -> &mut Queue<(u32, String)> {
         &mut self.output
     }
-
-    pub fn player_output(&mut self, id: u32, message: String) {
-        self.output.push((id, message));
-    }
+    
 }

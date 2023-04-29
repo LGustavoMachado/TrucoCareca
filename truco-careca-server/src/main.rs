@@ -8,15 +8,14 @@ use tokio::task::unconstrained;
 use tokio_tungstenite::{accept_async, WebSocketStream};
 use tokio_tungstenite::tungstenite::Message;
 use futures_util::{SinkExt, StreamExt, FutureExt};
+use queues::IsQueue;
 
 mod game;
-use game::game_event::get_event_from_command;
+use game::game_event::{get_event_from_command};
 use game::connection::Connection;
 use game::state_machine::StateMachine;
 use game::states::waiting_for_player_state::WaitingForPlayersState;
 use game::Game;
-
-
 
 #[derive(Debug)]
 pub enum Event {
@@ -73,6 +72,10 @@ pub async fn run(mut game_receiver: UnboundedReceiver<Event>) {
         // Capture all new events
         while let Some(event) = unconstrained(game_receiver.recv()).now_or_never() {
             match event {
+                Some(Event::Join(id, connection)) => {
+                    println!("PLAYER {} connected!", id);
+                    game_instance.add_player(id, connection);
+                }
                 Some(Event::Input(id, command)) => {
                     print!("USER INPUT RECEIVED {:#?}", command);
                     let game_event = get_event_from_command(id, command).unwrap();
@@ -86,7 +89,7 @@ pub async fn run(mut game_receiver: UnboundedReceiver<Event>) {
         state_machine.update(&mut game_instance, delta_time);
 
         // Game output
-        while let Some((id, message)) = game_instance.output_mut().pop() {
+        while let Ok((id, message)) = game_instance.output_mut().remove() {
             let (connection, _) = game_instance.get_player_mut(id).unwrap();
             match connection.sender.send(Message::Text(message.clone())).await {
                 Ok(_) => { println!("Message sent successfully {}", message) }
@@ -114,10 +117,7 @@ async fn connect_player(
     let (sender, mut receiver) = ws_stream.split();
     let conn = Connection::new(sender);
 
-    match unbounded_sender.send(Event::Join(id, conn)) {
-        Ok(()) => {}
-        Err(_) => {}
-    }
+    unbounded_sender.send(Event::Join(id, conn)).unwrap();
 
     while let Some(Ok(message)) = receiver.next().await {
         if message.is_text() {
