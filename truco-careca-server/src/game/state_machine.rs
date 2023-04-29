@@ -1,8 +1,7 @@
 use crate::game::Game;
-use crate::GameEvent;
 
 pub trait GameState: Send {
-    fn update(&self, game: &mut Game, event: GameEvent) -> Option<Box<dyn GameState>>;
+    fn update(&self, game: &mut Game, time: f32) -> Option<Box<dyn GameState>>;
 }
 
 pub struct StateMachine {
@@ -16,8 +15,8 @@ impl StateMachine {
         }
     }
 
-    pub fn update(&mut self, game: &mut Game, event: GameEvent) {
-        if let Some(state) = self.state.update(game, event) {
+    pub fn update(&mut self, game: &mut Game, time: f32) {
+        if let Some(state) = self.state.update(game, time) {
             self.state = state;
         }
     }

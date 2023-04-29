@@ -1,5 +1,4 @@
 use crate::game::Game;
-use crate::game::game_event::GameEvent;
 use crate::game::state_machine::GameState;
 use crate::game::states::waiting_for_ready_state::WaitingForReadyState;
 
@@ -14,20 +13,9 @@ impl WaitingForPlayersState {
 }
 
 impl GameState for WaitingForPlayersState {
-  fn update(&self, game: &mut Game, event: GameEvent) -> Option<Box<dyn GameState>> {
-    match event {
-      GameEvent::PlayerJoined(id, conn) => {
-        let res = game.add_player(id, conn);
-        match res {
-          Result::Ok(()) => {
-            if game.is_full() { 
-              return Some(Box::new(WaitingForReadyState::new())); 
-            }
-          },
-          Result::Err(_) => { }
-        }
-      }
-      _ => { }
+  fn update(&self, game: &mut Game, _time: f32) -> Option<Box<dyn GameState>> {
+    if game.is_full() {
+      return Some(Box::new(WaitingForReadyState::new()));
     }
     None
   }

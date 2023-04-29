@@ -1,17 +1,18 @@
-use futures_util::StreamExt;
 use std::net::SocketAddr;
+use std::{thread, time};
+use std::io::{Write};
 use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
+use tokio::task::unconstrained;
 use tokio_tungstenite::{accept_async, WebSocketStream};
-use futures_util::SinkExt;
 use tokio_tungstenite::tungstenite::Message;
+use futures_util::{SinkExt, StreamExt, FutureExt};
+use queues::IsQueue;
 
 mod game;
-
-use game::game_event::get_event_from_command;
+use game::game_event::{get_event_from_command};
 use game::connection::Connection;
-use game::game_event::GameEvent;
 use game::state_machine::StateMachine;
 use game::states::waiting_for_player_state::WaitingForPlayersState;
 use game::Game;
@@ -58,28 +59,47 @@ pub async fn run(mut game_receiver: UnboundedReceiver<Event>) {
     let mut game_instance = Game::new();
     let mut state_machine = StateMachine::new(Box::new(WaitingForPlayersState::new()));
 
-    while let Some(event) = game_receiver.recv().await {
-        match event {
-            Event::Join(id, conn) => {
-                state_machine.update(&mut game_instance, GameEvent::PlayerJoined(id, conn));
+    let sixteen_ms = time::Duration::from_millis(100);
+    let mut delta_time: f32 = 0.0;
+
+    // Game loop
+    loop {
+        let start_time = time::Instant::now();
+
+        print!(".");
+        std::io::stdout().flush().unwrap();
+
+        // Capture all new events
+        while let Some(event) = unconstrained(game_receiver.recv()).now_or_never() {
+            match event {
+                Some(Event::Join(id, connection)) => {
+                    println!("PLAYER {} connected!", id);
+                    game_instance.add_player(id, connection).unwrap();
+                }
+                Some(Event::Input(id, command)) => {
+                    print!("USER INPUT RECEIVED {:#?}", command);
+                    let game_event = get_event_from_command(id, command).unwrap();
+                    game_instance.input(game_event);
+                }
+                _ => {}
             }
-            Event::Input(id, command) => {
-                let game_event = get_event_from_command(id, command).unwrap();
-                state_machine.update(&mut game_instance, game_event);
-            }
-            Event::Quit(_) => {}
-            _ => {}
         }
 
-        game_instance.output_mut().reverse();
+        // Game update
+        state_machine.update(&mut game_instance, delta_time);
 
-        while let Some((id, message)) = game_instance.output_mut().pop() {
+        // Game output
+        while let Ok((id, message)) = game_instance.output_mut().remove() {
             let (connection, _) = game_instance.get_player_mut(id).unwrap();
             match connection.sender.send(Message::Text(message.clone())).await {
                 Ok(_) => { println!("Message sent successfully {}", message) }
                 Err(_) => {}
             }
         }
+
+        // sleep n
+        thread::sleep(sixteen_ms);
+        delta_time = start_time.elapsed().as_secs_f32();
     }
 }
 
@@ -97,10 +117,7 @@ async fn connect_player(
     let (sender, mut receiver) = ws_stream.split();
     let conn = Connection::new(sender);
 
-    match unbounded_sender.send(Event::Join(id, conn)) {
-        Ok(()) => {}
-        Err(_) => {}
-    }
+    unbounded_sender.send(Event::Join(id, conn)).unwrap();
 
     while let Some(Ok(message)) = receiver.next().await {
         if message.is_text() {

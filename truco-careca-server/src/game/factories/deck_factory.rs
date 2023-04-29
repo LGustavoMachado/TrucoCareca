@@ -14,7 +14,7 @@ pub fn create_deck(deck_type: DeckType) -> DeckOfCards {
     for rank in Rank::iter().skip(skip) {
         for suit in Suit::iter() {
             cards.push(Card::new(rank.clone(), suit.clone()));
-        }
+        } 
     }
     DeckOfCards::new(cards)
 }

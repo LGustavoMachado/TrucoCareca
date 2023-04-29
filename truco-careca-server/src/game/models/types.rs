@@ -1,5 +1,10 @@
 use strum_macros::EnumIter;
 
+pub enum GameMode {
+    Normal,
+    IronHands
+}
+
 #[derive(Copy, Clone, EnumIter, Debug, PartialEq)]
 pub enum Suit {
     Diamonds,

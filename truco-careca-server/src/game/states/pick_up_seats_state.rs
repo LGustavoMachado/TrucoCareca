@@ -1,8 +1,9 @@
 use crate::game::game_event::GameEvent;
 use crate::game::state_machine::GameState;
 use crate::game::Game;
+use super::start_game_state::StartGameState;
 
-use super::game_started_state::GameStartedState;
+use queues::IsQueue;
 
 pub struct PickUpSeatsState {}
 
@@ -14,41 +15,43 @@ impl PickUpSeatsState {
 }
 
 impl GameState for PickUpSeatsState {
-    fn update(&self, game: &mut Game, event: GameEvent) -> Option<Box<dyn GameState>> {
-        match event {
-            GameEvent::PickUpSeatEvent(id, seat) => {
-                if seat > 3 { return None; }
+    fn update(&self, game: &mut Game, _time: f32) -> Option<Box<dyn GameState>> {
+        while let Ok(event) = game.inputs.remove() {
+            match event {
+                GameEvent::PickUpSeatEvent(id, seat) => {
+                    if seat > 3 { return None; }
 
-                let seat = seat as usize;
-                let seat_free = game.seats[seat].is_none();
+                    let seat = seat as usize;
+                    let seat_free = game.seats[seat].is_none();
 
-                if seat_free {
+                    if seat_free {
+                        if let Some(index) = game.get_player_seat_index(id) {
+                            game.seats[index] = None;
+                        }
+                        game.seats[seat] = Some(id); // add to seat
+                        game.output(id, format!("Player {} in seat {}", id, seat));
+                    } else {
+                        game.output(id, String::from("SEAT IS OCCUPIED"));
+                    }
+                }
+                GameEvent::LeaveSeatEvent(id) => {
+                    // Find the player seat and remove it
                     if let Some(index) = game.get_player_seat_index(id) {
                         game.seats[index] = None;
+                        game.output(id, format!("Player left seat {}", index));
                     }
-                    game.seats[seat] = Some(id); // add to seat
-                    game.player_output(id, format!("Player {} in seat {}", id, seat));
-                } else {
-                    game.player_output(id, String::from("SEAT IS OCCUPIED"));
                 }
-            }
-            GameEvent::LeaveSeatEvent(id) => {
-                // Find the player seat and remove it
-                if let Some(index) = game.get_player_seat_index(id) {
-                    game.seats[index] = None;
-                    game.player_output(id, format!("Player left seat {}", index));
+                GameEvent::StartTheGameEvent => {
+                    if game.seats.iter().all(Option::is_some) {
+                        return Some(Box::new(StartGameState::new()));
+                    }
                 }
+                _ => {}
             }
-            GameEvent::StartTheGameEvent => {
-                if game.seats.iter().all(Option::is_some) {
-                    return Some(Box::new(GameStartedState::new()));
-                }
-            }
-            _ => {}
-        }
 
-        if game.seats.iter().all(Option::is_some) {
-            println!("Seats are all occupied")
+            if game.seats.iter().all(Option::is_some) {
+                println!("Seats are all occupied")
+            }
         }
 
         None
