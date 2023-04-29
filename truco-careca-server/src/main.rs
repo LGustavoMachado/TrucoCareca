@@ -74,7 +74,7 @@ pub async fn run(mut game_receiver: UnboundedReceiver<Event>) {
             match event {
                 Some(Event::Join(id, connection)) => {
                     println!("PLAYER {} connected!", id);
-                    game_instance.add_player(id, connection);
+                    game_instance.add_player(id, connection).unwrap();
                 }
                 Some(Event::Input(id, command)) => {
                     print!("USER INPUT RECEIVED {:#?}", command);

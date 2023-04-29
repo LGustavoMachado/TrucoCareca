@@ -69,11 +69,11 @@ impl Game {
     }
 
     pub fn input(&mut self, event: GameEvent) {
-        self.inputs.add(event);
+        self.inputs.add(event).unwrap();
     }
 
     pub fn output(&mut self, id: u32, message: String) {
-        self.output.add((id, message));
+        self.output.add((id, message)).unwrap();
     }
 
     pub fn add_player(&mut self, id: u32, connection: Connection) -> Result<(), String> {
@@ -120,5 +120,5 @@ impl Game {
     pub fn output_mut(&mut self) -> &mut Queue<(u32, String)> {
         &mut self.output
     }
-    
+
 }
