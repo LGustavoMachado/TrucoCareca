@@ -44,7 +44,29 @@ export default class Game {
   }
 
   showPickupSeats() {
-    console.log("SEATS", this.seats);
+    const startGameButton = document.createElement("button");
+    const leaveSeatButton = document.createElement("button");
+    startGameButton.innerText = "Start Game";
+    startGameButton.classList.add("start-game");
+    leaveSeatButton.innerText = "Leave Seat";
+    leaveSeatButton.classList.add("leave-seat");
+
+    startGameButton.addEventListener('click', () => {
+      const data = {
+        name: "start-the-game",
+        body: {}
+      };
+      this.conn.send(JSON.stringify(data));
+    });
+
+    leaveSeatButton.addEventListener('click', () => {
+      const data = {
+        name: "leave-seat",
+        body: {}
+      };
+      this.conn.send(JSON.stringify(data));
+    });
+
     for(let i=0; i<this.seats.length; i++) {
       const seat = document.createElement("div");
       seat.classList.add("seat");
@@ -56,8 +78,6 @@ export default class Game {
         seat.innerText = player.name;
       }
 
-      this.gameContainer.appendChild(seat);
-
       seat.addEventListener('click', () => {
         const data = {
           name: "pick-up-seat",
@@ -67,6 +87,10 @@ export default class Game {
         };
         this.conn.send(JSON.stringify(data));
       });
+
+      this.gameContainer.appendChild(seat);
+      this.gameContainer.appendChild(startGameButton);
+      this.gameContainer.appendChild(leaveSeatButton);
     }
   }
 
@@ -89,6 +113,14 @@ export default class Game {
       this.state = GameState.PICKUP_SEATS;
       return;
     }
+    
+    if(message.data === "START GAME STATE") {
+      this.log(message.data);
+      this.state = GameState.GAME_STARTED;
+      this.clearGame();
+      return;
+    }
+
 
     if(this.state === GameState.PICKUP_SEATS) {
       try {

@@ -64,6 +64,10 @@ html, body {
   max-height: 100%;
 }
 
+.player .container .game button {
+  float: right;
+}
+
 .player .container .game .seat {
   display: block;
 }

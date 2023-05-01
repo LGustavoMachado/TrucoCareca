@@ -58,10 +58,6 @@ impl GameState for PickUpSeatsState {
                 }
                 _ => {}
             }
-
-            if game.seats.iter().all(Option::is_some) {
-                println!("Seats are all occupied")
-            }
         }
 
         None
