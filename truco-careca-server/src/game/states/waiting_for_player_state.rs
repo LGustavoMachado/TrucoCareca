@@ -13,10 +13,17 @@ impl WaitingForPlayersState {
 }
 
 impl GameState for WaitingForPlayersState {
+
+  fn init(&self, game: &mut Game) { }
+
   fn update(&self, game: &mut Game, _time: f32) -> Option<Box<dyn GameState>> {
     if game.is_full() {
       return Some(Box::new(WaitingForReadyState::new()));
     }
     None
+  }
+
+  fn state_out(&self, game: &Game) -> String { 
+    "".to_string()
   }
 }

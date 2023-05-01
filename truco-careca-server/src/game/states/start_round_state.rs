@@ -16,6 +16,9 @@ impl StartRoundState {
 }
 
 impl GameState for StartRoundState {
+
+  fn init(&self, game: &mut Game) { }
+  
   fn update(&self, game: &mut Game, _time: f32) -> Option<Box<dyn GameState>> {
     game.turn = 0;
     game.table_cards = Vec::new();
@@ -45,6 +48,11 @@ impl GameState for StartRoundState {
 
     return Some(Box::new(PlayerTurnState::new()))
   }
+
+  fn state_out(&self, game: &Game) -> String { 
+    "".to_string()
+  }
+
 }
 
 fn is_match_point(score: (u8, u8)) -> bool {

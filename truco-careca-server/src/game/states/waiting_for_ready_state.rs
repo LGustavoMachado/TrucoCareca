@@ -9,12 +9,20 @@ pub struct WaitingForReadyState {}
 
 impl WaitingForReadyState {
     pub fn new() -> Self {
-        println!("WAITING FOR READY STATE");
         Self {}
     }
 }
 
+
 impl GameState for WaitingForReadyState {
+
+    fn init(&self, game: &mut Game) {
+        let ids: Vec<u32> = game.get_players().keys().cloned().collect();
+        for id in ids {
+            game.output(id, "WAITING FOR READY STATE".to_string());
+        }
+    }
+
     fn update(&self, game: &mut Game, _time: f32) -> Option<Box<dyn GameState>> {
         while let Ok(event) = game.inputs.remove() {
             match event {
@@ -22,6 +30,7 @@ impl GameState for WaitingForReadyState {
                     if let Some((_, player)) = game.get_player_mut(id) {
                         player.update(name.clone(), true);
                         println!("Player {} id: {} is ready", name, id);
+                        game.output(id, "Ready!".to_string());
                     }
                 }
                 _ => {}
@@ -32,5 +41,9 @@ impl GameState for WaitingForReadyState {
             }
         }
         None
+    }
+
+    fn state_out(&self, game: &Game) -> String { 
+      "".to_string()
     }
 }

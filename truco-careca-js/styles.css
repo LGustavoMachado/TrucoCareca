@@ -1,0 +1,106 @@
+
+:root {
+  /* CSS HSL */
+  --platinum: hsla(184, 19%, 83%, 1);
+  --non-photo-blue: hsla(183, 40%, 72%, 1);
+  --non-photo-blue-2: hsla(186, 52%, 67%, 1);
+  --cerulean: hsla(195, 100%, 33%, 1);
+  --prussian-blue: hsla(199, 100%, 14%, 1);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-size:20px;
+  color: var(--prussian-blue);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+#truco-careca {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+  height: 100vh;
+}
+
+.player {
+  display: flex;
+  flex-direction: column;
+  flex: 50%;
+  height: 50vh;
+  outline: 1px solid #fff;
+}
+
+.player .header {
+  padding: 6px 12px;
+  background-color: var(--non-photo-blue);
+  font-weight: bold;
+}
+
+.player .container {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  position: relative;
+  min-height: 0;
+}
+
+.player .container .game {
+  font-size: 1em;
+  flex: 2;
+  padding: 12px;
+  outline: 1px solid var(--platinum);
+}
+
+.player .container .console {
+  color:var(--non-photo-blue);
+  font-size: 0.8em;
+  flex: 1;
+  background-color: var(--prussian-blue);
+  padding: 0 12px;
+  overflow-y: scroll;
+  max-height: 100%;
+}
+
+.player .container .game .seat {
+  display: block;
+}
+
+.player .container .game .seat:nth-child(1) {
+  position:absolute;
+  left: 100px;
+}
+
+.player .container .game .seat:nth-child(2) {
+  position:absolute;
+  top: 110px;
+  left: 200px;
+}
+
+.player .container .game .seat:nth-child(3) {
+  position:absolute;
+  top: 200px;
+  left: 100px;
+}
+
+.player .container .game .seat:nth-child(4) {
+  top: 110px;
+  position:absolute;
+}
+
+.player .container .game .seat:before {
+  content: '🪑';
+  position:absolute;
+  display: block;
+  font-size: 80px;
+}
+
+.player .container .game .seat.player-seated:after {
+  content: '🧍';
+  position: relative;
+  z-index: 1;
+  display: block;
+  font-size: 80px;
+}

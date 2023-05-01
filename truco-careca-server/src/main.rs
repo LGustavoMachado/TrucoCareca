@@ -97,6 +97,17 @@ pub async fn run(mut game_receiver: UnboundedReceiver<Event>) {
             }
         }
 
+        // Game state
+        let ids: Vec<u32> = game_instance.get_players().keys().cloned().collect();
+        for id in ids {
+            let message = state_machine.state_out(&game_instance);
+            let (connection, _) = game_instance.get_player_mut(id).unwrap();
+            match connection.sender.send(Message::Text(message)).await {
+                Ok(_) => { }
+                Err(_) => {}
+            }
+        }
+
         // sleep n
         thread::sleep(sixteen_ms);
         delta_time = start_time.elapsed().as_secs_f32();

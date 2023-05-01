@@ -14,11 +14,18 @@ impl StartGameState {
 }
 
 impl GameState for StartGameState {
+
+  fn init(&self, game: &mut Game) { }
+  
   fn update(&self, game: &mut Game, _time: f32) -> Option<Box<dyn GameState>> {
     game.score = (0,0);
     game.dealer = 0;
     game.mode = GameMode::Normal;
 
     return Some(Box::new(StartRoundState::new())); 
+  }
+
+  fn state_out(&self, game: &Game) -> String { 
+    "".to_string()
   }
 }

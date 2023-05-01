@@ -3,6 +3,8 @@ use crate::game::state_machine::GameState;
 use crate::game::Game;
 use super::start_game_state::StartGameState;
 
+use serde_json::{json, Value};
+use serde::Deserialize;
 use queues::IsQueue;
 
 pub struct PickUpSeatsState {}
@@ -15,6 +17,14 @@ impl PickUpSeatsState {
 }
 
 impl GameState for PickUpSeatsState {
+    
+    fn init(&self, game: &mut Game) {
+        let ids: Vec<u32> = game.get_players().keys().cloned().collect();
+        for id in ids {
+            game.output(id, "PICK UP SEATS STATE".to_string());
+        }
+    }
+
     fn update(&self, game: &mut Game, _time: f32) -> Option<Box<dyn GameState>> {
         while let Ok(event) = game.inputs.remove() {
             match event {
@@ -56,4 +66,29 @@ impl GameState for PickUpSeatsState {
 
         None
     }
+
+    fn state_out(&self, game: &Game) -> String {
+
+        let mut seats: Vec<serde_json::Value> = vec![];
+
+        for seat in game.seats() {
+            match seat {
+                Some(id) => {
+                    let (_, player) = game.get_player(*id).unwrap();
+                    seats.push(json!({
+                        "id": id,
+                        "name": player.name
+                    }))
+                }
+                None => {
+                    seats.push(json!(null))
+                }
+            }
+        }
+
+        json!({
+            "seats": seats
+        }).to_string()
+    }
+
 }
