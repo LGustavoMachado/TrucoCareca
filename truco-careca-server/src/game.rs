@@ -76,6 +76,10 @@ impl Game {
         self.output.add((id, message)).unwrap();
     }
 
+    pub fn seats(&self) -> &[Option<u32>; 4] {
+        &self.seats
+    }
+
     pub fn add_player(&mut self, id: u32, connection: Connection) -> Result<(), String> {
         if self.list_players.len() < 4 {
             self.list_players
@@ -89,6 +93,17 @@ impl Game {
 
     pub fn is_full(&self) -> bool {
         self.list_players.len() == 4
+    }
+
+    pub fn get_players(&self) -> &HashMap<u32, (Connection, Player)> {
+        &self.list_players
+    }
+
+    pub fn get_player(&self, id: u32) -> Option<(&Connection, &Player)> {
+        if let Some((connection, player)) = self.list_players.get(&id) {
+            return Some((connection, player));
+        }
+        None
     }
 
     pub fn get_player_mut(&mut self, id: u32) -> Option<(&mut Connection, &mut Player)> {
