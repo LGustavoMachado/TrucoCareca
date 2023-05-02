@@ -24,5 +24,12 @@ window.addEventListener("load", function () {
         conn.addEventListener('message', (event) => {
             game.onMessage(event);
         });
+
+        const gameLoop = (tFrame) => {
+            game.update(tFrame);
+            window.requestAnimationFrame(gameLoop);
+        };
+    
+        gameLoop(); // Start the cycle
     }
 });

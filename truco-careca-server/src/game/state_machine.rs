@@ -3,7 +3,7 @@ use crate::game::Game;
 pub trait GameState: Send {
     fn init(&self, game: &mut Game);
     fn update(&self, game: &mut Game, time: f32) -> Option<Box<dyn GameState>>;
-    fn state_out(&self, game: &Game) -> String;
+    fn state_out(&self, game: &Game, player_id: u32) -> String;
 }
 
 pub struct StateMachine {
@@ -24,7 +24,7 @@ impl StateMachine {
         }
     }
 
-    pub fn state_out(&self, game: &Game) -> String {
-        self.state.state_out(game)
+    pub fn state_out(&self, game: &Game, player_id: u32) -> String {
+        self.state.state_out(game, player_id)
     }
 }

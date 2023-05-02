@@ -12,14 +12,14 @@ impl MatchPointState {
 }
 
 impl GameState for MatchPointState {
-    
+
   fn init(&self, game: &mut Game) { }
-  
+
   fn update(&self, _game: &mut Game, _time: f32) -> Option<Box<dyn GameState>> {
     None
   }
 
-  fn state_out(&self, game: &Game) -> String { 
+  fn state_out(&self, game: &Game, player_id: u32) -> String { 
     "".to_string()
   }
 }

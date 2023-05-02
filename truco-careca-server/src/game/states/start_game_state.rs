@@ -15,7 +15,12 @@ impl StartGameState {
 
 impl GameState for StartGameState {
 
-  fn init(&self, game: &mut Game) { }
+  fn init(&self, game: &mut Game) {
+    let ids: Vec<u32> = game.get_players().keys().cloned().collect();
+    for id in ids {
+        game.output(id, "START GAME STATE".to_string());
+    }
+  }
   
   fn update(&self, game: &mut Game, _time: f32) -> Option<Box<dyn GameState>> {
     game.score = (0,0);
@@ -25,7 +30,7 @@ impl GameState for StartGameState {
     return Some(Box::new(StartRoundState::new())); 
   }
 
-  fn state_out(&self, game: &Game) -> String { 
+  fn state_out(&self, game: &Game, player_id: u32) -> String { 
     "".to_string()
   }
 }

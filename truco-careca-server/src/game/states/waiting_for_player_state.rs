@@ -2,6 +2,8 @@ use crate::game::Game;
 use crate::game::state_machine::GameState;
 use crate::game::states::waiting_for_ready_state::WaitingForReadyState;
 
+use serde_json::{json};
+
 pub struct WaitingForPlayersState {
 }
 
@@ -23,7 +25,11 @@ impl GameState for WaitingForPlayersState {
     None
   }
 
-  fn state_out(&self, game: &Game) -> String { 
-    "".to_string()
+  fn state_out(&self, game: &Game, player_id: u32) -> String {
+    json!({
+      "state": {
+          "name": "waiting-for-ready"
+      }
+    }).to_string()
   }
 }

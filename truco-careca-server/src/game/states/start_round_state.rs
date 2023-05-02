@@ -49,7 +49,7 @@ impl GameState for StartRoundState {
     return Some(Box::new(PlayerTurnState::new()))
   }
 
-  fn state_out(&self, game: &Game) -> String { 
+  fn state_out(&self, game: &Game, player_id: u32) -> String { 
     "".to_string()
   }
 
