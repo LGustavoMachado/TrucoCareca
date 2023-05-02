@@ -63,7 +63,7 @@ impl GameState for PickUpSeatsState {
         None
     }
 
-    fn state_out(&self, game: &Game) -> String {
+    fn state_out(&self, game: &Game, _player_id: u32) -> String {
 
         let mut seats: Vec<serde_json::Value> = vec![];
 
@@ -83,7 +83,12 @@ impl GameState for PickUpSeatsState {
         }
 
         json!({
-            "seats": seats
+            "state": {
+                "name": "pick-up-seats",
+                "body": {
+                    "seats": seats
+                }
+            },
         }).to_string()
     }
 

@@ -42,7 +42,7 @@ pub struct Game {
     pub gave_up_players: Vec<usize>,
     pub manilha: Card,
     pub mode: GameMode,
-}
+}   
 
 impl Game {
 

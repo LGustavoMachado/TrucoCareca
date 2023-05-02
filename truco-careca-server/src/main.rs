@@ -100,7 +100,7 @@ pub async fn run(mut game_receiver: UnboundedReceiver<Event>) {
         // Game state
         let ids: Vec<u32> = game_instance.get_players().keys().cloned().collect();
         for id in ids {
-            let message = state_machine.state_out(&game_instance);
+            let message = state_machine.state_out(&game_instance, id.clone());
             let (connection, _) = game_instance.get_player_mut(id).unwrap();
             match connection.sender.send(Message::Text(message)).await {
                 Ok(_) => { }

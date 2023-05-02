@@ -30,7 +30,7 @@ impl GameState for StartGameState {
     return Some(Box::new(StartRoundState::new())); 
   }
 
-  fn state_out(&self, game: &Game) -> String { 
+  fn state_out(&self, game: &Game, player_id: u32) -> String { 
     "".to_string()
   }
 }
